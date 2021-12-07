@@ -46,13 +46,13 @@ private:
 public:
 
 	int get_nr_noduri() { return nr_noduri; }
-	void set_nr_noduri(int n) { nr_noduri = n; }
+	//void set_nr_noduri(int n) { nr_noduri = n; }
 
 	int get_nr_muchii() { return nr_muchii; }
-	void set_nr_muchii(int m) { nr_muchii = m; }
+	//void set_nr_muchii(int m) { nr_muchii = m; }
 
 	int get_start() { return start; }
-	void set_start(int s) { start = s; }
+	//void set_start(int s) { start = s; }
 
 	Graf(){}
 
@@ -153,6 +153,8 @@ public:
 		}
 	}
 	void bfs() {
+
+		citire_graf_bfs();
 
 		queue<int>coada;
 		int x;
@@ -412,7 +414,7 @@ public:
 		}
 		f.close();
 	}
-	int reprez(int u, vector<int>tata) {
+	int reprez(int u, vector<int>& tata) {
 
 		while (tata[u] != 0) { u = tata[u]; }
 		return u;
@@ -431,7 +433,6 @@ public:
 		}
 	}
 
-
 	void apm() {
 
 
@@ -441,8 +442,6 @@ public:
 		sort(muchiiCost.begin(), muchiiCost.end(), compare);
 
 		vector<int>tata, h;
-		//tata.resize(nr_noduri + 1);
-		//h.resize(nr_noduri + 1);
 		for (int i = 0; i <= nr_noduri; i++) { //initializam vect de tati si de intaltimi cu 0 pt toata lumea
 
 			tata.push_back(0);
@@ -461,10 +460,10 @@ public:
 
 			if (reprez(u, tata) != reprez(v, tata)) {
 
-				muchii_arbore.push_back(muchiiCost[i]); //adaugam o noua muchie in arbore
+				muchii_arbore.push_back(muchiiCost[i]); 
 				suma_costuri += muchiiCost[i].get_cost();
 				reuneste(u, v, tata, h);
-				nr++; //crestem contorul pentru numarul de noduri folosite pentru acest graf
+				nr++; 
 
 				if (nr == nr_noduri - 1) { break; }
 			}
@@ -620,7 +619,6 @@ public:
 
 		f.close();
 	}
-
 	void bellman_ford() {
 
 		vector<vector<pair<int, int>>> lista;
@@ -630,7 +628,8 @@ public:
 		vector<int>dist, aparitii, count;
 		queue<int>coada;
 		
-
+		// to do : initializari din constructori
+		//dist(nr_muchii + 1, infinit)
 		for (int i = 0; i <= nr_noduri; i++) { dist.push_back(0); aparitii.push_back(0); count.push_back(0); }
 		for (int i = 0; i <= nr_noduri; i++) { dist[i] = infinit; }
 
@@ -653,7 +652,6 @@ public:
 				if (dist[u] + cost < dist[v]) {
 
 					dist[v] = dist[u] + cost;
-
 					count[v] = count[v] + 1;
 					if (count[v] == nr_noduri) { ok = false; break; }
 
@@ -680,6 +678,251 @@ public:
 		g.close();
 	}
 
+	//royfloyd
 
+	void citire_royfloyd() {
+
+		int infinit = std::numeric_limits<int>::max();
+		ifstream f("royfloyd.in");
+		f >> nr_noduri;
+
+		lista.resize(nr_noduri + 1);
+
+
+		int cost;
+		for (int i = 0; i < nr_noduri; i++) {
+
+			for (int j = 0; j < nr_noduri; j++) {
+
+				lista[i].push_back(infinit);
+				if (i == j) lista[i][i] = 0;
+
+				f >> cost;
+				if (cost != 0) {
+
+					lista[i][j] = cost;
+				}
+			}
+		}
+		f.close();
+	}
+	void royfloyd() {
+
+		citire_royfloyd();
+
+		for (int k = 0; k < nr_noduri; k++) {
+
+			for (int i = 0; i < nr_noduri; i++) {
+
+				for (int j = 0; j < nr_noduri; j++) {
+
+
+					if (lista[i][j] > lista[i][k] + lista[k][j]) {
+
+						lista[i][j] = lista[i][k] + lista[k][j];
+					}
+				}
+			}
+		}
+
+		ofstream g("royfloyd.out");
+
+		for (int i = 0; i < nr_noduri; i++) {
+
+			for (int j = 0; j < nr_noduri; j++) {
+
+				g << lista[i][j] << " ";
+			}
+
+			g << endl;
+		}
+		g.close();
+	}
+
+	//Diametrul unui arbore
+
+	void citire_diametru() {
+
+		ifstream f("darb.in");
+		int x, y;
+		f >> nr_noduri;
+
+		lista.resize(nr_noduri + 1);
+
+		while (f >> x >> y) {
+
+			lista[x].push_back(y);
+			lista[y].push_back(x);
+		}
+		f.close();
+
+		/*for (int i = 1; i <= nr_noduri; i++) {
+
+			cout << i << ": ";
+			for (int j = 0; j < lista[i].size(); j++) {
+
+				cout << lista[i][j] << ", ";
+			}
+			cout << endl;
+		}*/
+	}
+	vector<int> bfs_vizit(int start) {
+
+		queue<int>coada;
+		int x;
+
+		vector<int> vizit(nr_noduri + 1, 0);
+
+		coada.push(start);
+		vizit[start] = 1;
+
+		while (!coada.empty()) {
+
+			x = coada.front();
+			coada.pop();
+
+			for (int i = 0; i < lista[x].size(); i++) {
+
+				if (vizit[lista[x][i]] == 0) {
+
+					coada.push(lista[x][i]);
+					vizit[lista[x][i]] = vizit[x] + 1;
+				}
+			}
+		}
+
+		return vizit;
+
+	}
+	void diametru_arbore() {
+
+		citire_diametru();
+		int random = rand() % nr_noduri + 1;
+
+		vector<int>vizit = bfs_vizit(random);
+
+		int nod_maxi;
+		int dist = 0;
+		for (int i = 1; i <= nr_noduri; i++) {
+
+			if (vizit[i] > dist) {
+
+				dist = vizit[i];
+				nod_maxi = i;
+			}
+		}
+
+		vizit = bfs_vizit(nod_maxi);
+
+		int diam = 0;
+		for (int i = 1; i <= nr_noduri; i++) {
+
+			if (vizit[i] > diam) { diam = vizit[i]; }
+		}
+
+		ofstream g("darb.out");
+		g << diam;
+		g.close();
+	}
+
+
+	//flux maxim
+
+	void citire_flux_maxim(vector<vector<int>>& flux){
+		
+		ifstream f("maxflow.in");
+
+		f >> nr_noduri;
+		f >> nr_muchii;
+
+		lista.resize(nr_noduri + 1);
+
+		flux.resize(nr_noduri + 1, vector<int>(nr_noduri + 1, 0));
+
+		int x, y, cost;
+		while (f >> x >> y >> cost) {
+
+			lista[x].push_back(y);
+			lista[y].push_back(x);
+			flux[x][y] = cost;
+		}
+
+		f.close();
+	}
+
+	bool bfs_flux(int start, int final, vector<vector<int>>& flux, vector<int>& tata) {
+
+		queue<int>coada;
+		int x;
+
+		vector<int> vizit(nr_noduri + 1, 0);
+
+		coada.push(start);
+		vizit[start] = 1;
+
+		while (!coada.empty()) {
+
+			x = coada.front();
+			coada.pop();
+
+			for (int i = 0; i < lista[x].size(); i++) {
+
+				if (vizit[lista[x][i]] == 0 && flux[x][lista[x][i]] > 0) {
+
+					if(lista[x][i] == final){
+					
+						tata[final] = x;
+						return true;
+					}
+
+					coada.push(lista[x][i]);
+					vizit[lista[x][i]] = 1;
+					tata[lista[x][i]] = x;
+				}
+			}
+		}
+
+		return false;
+	}
+
+
+	void flux_maxim() {
+
+		vector<vector<int>> flux;
+		citire_flux_maxim(flux);
+
+		vector<int>tata(nr_noduri + 1, 0);
+
+		int maxi = 0;
+
+		while (bfs_flux(1, nr_noduri, flux, tata) == true) {
+
+			int x = nr_noduri;
+			int mini = 0;
+
+			while (x != 1) {
+
+				if (mini == 0 || flux[tata[x]][x] < mini) { mini = flux[tata[x]][x]; }
+
+				x = tata[x];
+			}
+
+			x = nr_noduri;
+
+			while (x != 1) {
+
+				flux[tata[x]][x] = flux[tata[x]][x] - mini;
+				flux[x][tata[x]] = mini;
+				x = tata[x];
+			}
+
+			maxi += mini;
+		}
+
+		ofstream g("maxflow.out");
+		g << maxi;
+		g.close();
+	}
 };
+
 

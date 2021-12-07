@@ -5,7 +5,7 @@ int main() {
 
 	Graf* g = new Graf;
 
-	g->bellman_ford();
+	g->flux_maxim();
 	return 0;
 }
 
