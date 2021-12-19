@@ -4,7 +4,7 @@
 #include<vector>
 #include<queue>
 #include<stack>
-#include <algorithm>
+#include<algorithm>
 #include<set>
 using namespace std;
 
@@ -274,7 +274,6 @@ public:
 
 		ifstream f("havel.in");
 		int x;
-
 		vector<int> v;
 
 		while (f >> x) {
@@ -282,13 +281,10 @@ public:
 			v.push_back(x);
 		}
 
-		
-		
 		int ok = 0;
 		int fst;
 
 		while (ok == 0) {
-
 
 			sort(v.begin(), v.end(), greater<>());
 
@@ -299,11 +295,9 @@ public:
 
 			if (fst > v.size()) { break; }
 
-
 			for (int i = 0; i < v.size(); i++) {
 
 				v[i]--;
-
 				if (v[i] < 0) { break; }
 			}
 
@@ -849,7 +843,6 @@ public:
 
 		f.close();
 	}
-
 	bool bfs_flux(int start, int final, vector<vector<int>>& flux, vector<int>& tata) {
 
 		queue<int>coada;
@@ -884,8 +877,6 @@ public:
 
 		return false;
 	}
-
-
 	void flux_maxim() {
 
 		vector<vector<int>> flux;
@@ -922,6 +913,83 @@ public:
 		ofstream g("maxflow.out");
 		g << maxi;
 		g.close();
+	}
+
+
+
+	//graf eulerian !!!!! nu-i ok, il refacem pe tot
+
+	void citire_graf_eulerian(vector<vector<pair<int, int>>>& l) {
+
+		ifstream f("ciclueuler.in");
+		f >> nr_noduri;
+		f >> nr_muchii;
+
+		l.resize(nr_noduri + 1);
+
+		int x, y;
+		int nr_muchie = 0;
+		while(f>>x>>y) {//adaug in lista de muchii pereche (nod_final, nr_muchie)
+
+			nr_muchie++;
+			l[x].push_back(make_pair(y, nr_muchie));
+			l[y].push_back(make_pair(x, nr_muchie));
+		}
+
+		f.close();
+	}
+	void graf_eulerian() {
+
+		vector<vector<pair<int, int>>> l;
+		citire_graf_eulerian(l);
+	
+
+		bool ok = true;
+		for (int i = 1; i <= nr_noduri && ok == true; i++) {
+
+			if(l[i].size() % 2 == 1){ 
+
+				ok = false;
+			}
+		}
+
+		ofstream g("ciclueuler.out");
+		if (ok == true) {
+
+			vector<int> v; //vect de solutii
+			vector<int> vizit(nr_muchii + 1, 0);//vect de muchii vizitate
+
+			euler(1, l, vizit, v);
+
+			for (int i = 0; i < v.size(); i++) {
+
+				g << v[i] << " ";
+			}
+			g.close();
+		}
+		else {
+
+			g << -1;
+		}
+		g.close();
+	}
+	void euler(int nod_curent, vector<vector<pair<int, int>>>& l, vector<int>& vizit, vector<int>& v) {
+
+		while (l[nod_curent].size() != 0) {
+
+			int vecin = l[nod_curent][l[nod_curent].size() - 1].first;
+			int nr_muchie = l[nod_curent][l[nod_curent].size() - 1].second;
+
+			l[nod_curent].pop_back();
+
+			if (vizit[nr_muchie] == 0) {
+
+				vizit[nr_muchie] = 1;
+				euler(vecin, l, vizit, v);
+			}
+		}
+
+		v.push_back(nod_curent);
 	}
 };
 

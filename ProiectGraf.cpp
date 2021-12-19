@@ -5,7 +5,8 @@ int main() {
 
 	Graf* g = new Graf;
 
-	g->flux_maxim();
+	g->graf_eulerian();
+
 	return 0;
 }
 
